@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>レベルアップToDo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+    header {
+      background: #2d2d30;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #00bfff;
+    }
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background: #252526;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+    }
+    .stats p {
+      margin: 0;
+      font-weight: bold;
+    }
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+    }
+    button {
+      background: #00bfff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #009acd;
+    }
+    .task {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task.completed {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
+    .task-details {
+      flex-grow: 1;
+    }
+    .actions button {
+      margin-left: 6px;
+      padding: 5px 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>レベルアップToDo</h1>
+  </header>
+  <div class="container">
+    <div class="stats">
+      <p>📈 レベル: <span id="level">1</span></p>
+      <p>💥 経験値: <span id="exp">0</span> / 500</p>
+      <p>💰 マネー: <span id="money">0</span> 円</p>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="taskInput" placeholder="タスク名">
+      <input type="number" id="expInput" placeholder="経験値" min="0">
+      <input type="date" id="dueDateInput">
+      <select id="priorityInput">
+        <option value="1">低</option>
+        <option value="2">中</option>
+        <option value="3">高</option>
+      </select>
+      <button onclick="addTask()">追加・更新</button>
+    </div>
+
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+    let editingId = null;
+    let exp = parseInt(localStorage.getItem("exp") || "0");
+    let level = parseInt(localStorage.getItem("level") || "1");
+    let money = parseInt(localStorage.getItem("money") || "0");
+
+    function saveData() {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem("exp", exp);
+      localStorage.setItem("level", level);
+      localStorage.setItem("money", money);
+    }
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      list.innerHTML = "";
+      tasks.sort((a, b) => new Date(a.due) - new Date(b.due) || b.priority - a.priority);
+      tasks.forEach((task, i) => {
+        const div = document.createElement("div");
+        div.className = "task" + (task.done ? " completed" : "");
+        div.innerHTML = `
+          <div class="task-details">
+            <strong>${task.name}</strong><br>
+            ⏳${task.due} | ⭐${["低","中","高"][task.priority - 1]} | 💥${task.exp}EXP
+          </div>
+          <div class="actions">
+            <button onclick="toggleTask(${i})">${task.done ? "戻す" : "完了"}</button>
+            <button onclick="editTask(${i})">編集</button>
+            <button onclick="deleteTask(${i})">削除</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+      document.getElementById("exp").textContent = exp;
+      document.getElementById("level").textContent = level;
+      document.getElementById("money").textContent = money;
+    }
+
+    function addTask() {
+      const name = document.getElementById("taskInput").value.trim();
+      const expVal = parseInt(document.getElementById("expInput").value);
+      const due = document.getElementById("dueDateInput").value;
+      const priority = parseInt(document.getElementById("priorityInput").value);
+      if (!name || !due || isNaN(expVal)) return alert("全ての項目を入力してください");
+
+      if (editingId !== null) {
+        tasks[editingId] = { name, exp: expVal, due, priority, done: false };
+        editingId = null;
+      } else {
+        tasks.push({ name, exp: expVal, due, priority, done: false });
+      }
+      document.getElementById("taskInput").value = "";
+      document.getElementById("expInput").value = "";
+      document.getElementById("dueDateInput").value = "";
+      renderTasks();
+      saveData();
+    }
+
+    function toggleTask(i) {
+      if (!tasks[i].done) {
+        exp += tasks[i].exp;
+        while (exp >= 500) {
+          exp -= 500;
+          level += 1;
+          money += 500;
+        }
+      } else {
+        exp -= tasks[i].exp;
+        if (exp < 0 && level > 1) {
+          exp += 500;
+          level -= 1;
+          money -= 500;
+        }
+      }
+      tasks[i].done = !tasks[i].done;
+      renderTasks();
+      saveData();
+    }
+
+    function deleteTask(i) {
+      if (confirm("このタスクを削除しますか？")) {
+        tasks.splice(i, 1);
+        renderTasks();
+        saveData();
+      }
+    }
+
+    function editTask(i) {
+      const t = tasks[i];
+      document.getElementById("taskInput").value = t.name;
+      document.getElementById("expInput").value = t.exp;
+      document.getElementById("dueDateInput").value = t.due;
+      document.getElementById("priorityInput").value = t.priority;
+      editingId = i;
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
