@@ -1,87 +1,33 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>レベルアップToDo</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #1e1e1e;
-      color: #ffffff;
-    }
-    header {
-      background: #2d2d30;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 1px solid #444;
-    }
-    h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: #00bfff;
-    }
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      background: #252526;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid #333;
-    }
-    .stats p {
-      margin: 0;
-      font-weight: bold;
-    }
-    .input-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #1e1e1e; color: #ffffff; }
+    header { background: #2d2d30; padding: 1rem; text-align: center; border-bottom: 1px solid #444; }
+    h1 { margin: 0; font-size: 1.8rem; color: #00bfff; }
+    .container { padding: 20px; max-width: 900px; margin: auto; }
+    .stats { display: flex; flex-wrap: wrap; gap: 1rem; background: #252526; padding: 1rem; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+    .stats p { margin: 0; font-weight: bold; }
+    .input-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     input, select, button {
-      padding: 10px;
-      background: #2a2a2a;
-      color: #fff;
-      border: 1px solid #444;
-      border-radius: 6px;
+      padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 6px;
     }
-    button {
-      background: #00bfff;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #009acd;
-    }
+    button { background: #00bfff; color: black; font-weight: bold; cursor: pointer; }
+    button:hover { background: #009acd; }
     .task {
-      background: #2a2a2a;
-      border: 1px solid #444;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      background: #2a2a2a; border: 1px solid #444; padding: 15px; border-radius: 8px;
+      margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
     }
-    .task.completed {
-      opacity: 0.6;
-      text-decoration: line-through;
-    }
-    .task-details {
-      flex-grow: 1;
-    }
-    .actions button {
-      margin-left: 6px;
-      padding: 5px 10px;
+    .task.completed { opacity: 0.6; text-decoration: line-through; }
+    .task-details { flex-grow: 1; }
+    .actions button { margin-left: 6px; padding: 5px 10px; }
+    footer {
+      text-align:center; padding: 1rem; color:#888; font-size: 0.9rem;
+      background:#1a1a1a; border-top:1px solid #333;
     }
   </style>
 </head>
@@ -91,13 +37,14 @@
   </header>
   <div class="container">
     <div class="stats">
-      <div style="margin-top:10px;">
-        <input type="number" id="spendInput" placeholder="使う金額 (円)" min="0" style="margin-right:5px; width:120px;">
-        <button onclick="spendMoney()">使う</button>
-      </div>
       <p>📈 レベル: <span id="level">1</span></p>
       <p>💥 経験値: <span id="exp">0</span> / 500</p>
       <p>💰 マネー: <span id="money">0</span> 円</p>
+      <p>✅ 達成数: <span id="completedCount">0</span></p>
+      <div>
+        <input type="number" id="spendInput" placeholder="使う金額 (円)" min="0" style="width:120px;">
+        <button onclick="spendMoney()">使う</button>
+      </div>
     </div>
 
     <div class="input-group">
@@ -115,6 +62,17 @@
     <div id="taskList"></div>
   </div>
 
+  <footer>
+    <p>📜 パッチノート</p>
+    <ul style="list-style:none; padding-left:0;">
+      <li>・レベル・経験値・マネーによる成長要素</li>
+      <li>・締切順 > 優先度順で自動ソート</li>
+      <li>・編集 / 削除 / 完了ステータスの管理</li>
+      <li>・マネーの使用機能を追加</li>
+      <li>・総タスク達成数の表示を追加</li>
+    </ul>
+  </footer>
+
   <script>
     let tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
     let editingId = null;
@@ -127,6 +85,11 @@
       localStorage.setItem("exp", exp);
       localStorage.setItem("level", level);
       localStorage.setItem("money", money);
+    }
+
+    function updateCompletedCount() {
+      const count = tasks.filter(t => t.done).length;
+      document.getElementById("completedCount").textContent = count;
     }
 
     function renderTasks() {
@@ -152,6 +115,7 @@
       document.getElementById("exp").textContent = exp;
       document.getElementById("level").textContent = level;
       document.getElementById("money").textContent = money;
+      updateCompletedCount();
     }
 
     function addTask() {
@@ -171,22 +135,6 @@
       document.getElementById("expInput").value = "";
       document.getElementById("dueDateInput").value = "";
       renderTasks();
-
-    function spendMoney() {
-      const amount = parseInt(document.getElementById("spendInput").value);
-      if (isNaN(amount) || amount <= 0) {
-        alert("有効な金額を入力してください。");
-        return;
-      }
-      if (amount > money) {
-        alert("マネーが足りません。");
-        return;
-      }
-      money -= amount;
-      document.getElementById("spendInput").value = "";
-      renderTasks();
-      saveData();
-    }
       saveData();
     }
 
@@ -208,22 +156,6 @@
       }
       tasks[i].done = !tasks[i].done;
       renderTasks();
-
-    function spendMoney() {
-      const amount = parseInt(document.getElementById("spendInput").value);
-      if (isNaN(amount) || amount <= 0) {
-        alert("有効な金額を入力してください。");
-        return;
-      }
-      if (amount > money) {
-        alert("マネーが足りません。");
-        return;
-      }
-      money -= amount;
-      document.getElementById("spendInput").value = "";
-      renderTasks();
-      saveData();
-    }
       saveData();
     }
 
@@ -231,22 +163,6 @@
       if (confirm("このタスクを削除しますか？")) {
         tasks.splice(i, 1);
         renderTasks();
-
-    function spendMoney() {
-      const amount = parseInt(document.getElementById("spendInput").value);
-      if (isNaN(amount) || amount <= 0) {
-        alert("有効な金額を入力してください。");
-        return;
-      }
-      if (amount > money) {
-        alert("マネーが足りません。");
-        return;
-      }
-      money -= amount;
-      document.getElementById("spendInput").value = "";
-      renderTasks();
-      saveData();
-    }
         saveData();
       }
     }
@@ -260,8 +176,6 @@
       editingId = i;
     }
 
-    renderTasks();
-
     function spendMoney() {
       const amount = parseInt(document.getElementById("spendInput").value);
       if (isNaN(amount) || amount <= 0) {
@@ -277,6 +191,8 @@
       renderTasks();
       saveData();
     }
+
+    renderTasks();
   </script>
 </body>
 </html>
