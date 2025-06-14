@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -91,6 +92,10 @@
   </header>
   <div class="container">
     <div class="stats">
+      <div style="margin-top:10px;">
+        <input type="number" id="spendInput" placeholder="使う金額 (円)" min="0" style="margin-right:5px; width:120px;">
+        <button onclick="spendMoney()">使う</button>
+      </div>
       <p>📈 レベル: <span id="level">1</span></p>
       <p>💥 経験値: <span id="exp">0</span> / 500</p>
       <p>💰 マネー: <span id="money">0</span> 円</p>
@@ -167,6 +172,22 @@
       document.getElementById("expInput").value = "";
       document.getElementById("dueDateInput").value = "";
       renderTasks();
+
+    function spendMoney() {
+      const amount = parseInt(document.getElementById("spendInput").value);
+      if (isNaN(amount) || amount <= 0) {
+        alert("有効な金額を入力してください。");
+        return;
+      }
+      if (amount > money) {
+        alert("マネーが足りません。");
+        return;
+      }
+      money -= amount;
+      document.getElementById("spendInput").value = "";
+      renderTasks();
+      saveData();
+    }
       saveData();
     }
 
@@ -188,6 +209,22 @@
       }
       tasks[i].done = !tasks[i].done;
       renderTasks();
+
+    function spendMoney() {
+      const amount = parseInt(document.getElementById("spendInput").value);
+      if (isNaN(amount) || amount <= 0) {
+        alert("有効な金額を入力してください。");
+        return;
+      }
+      if (amount > money) {
+        alert("マネーが足りません。");
+        return;
+      }
+      money -= amount;
+      document.getElementById("spendInput").value = "";
+      renderTasks();
+      saveData();
+    }
       saveData();
     }
 
@@ -195,6 +232,22 @@
       if (confirm("このタスクを削除しますか？")) {
         tasks.splice(i, 1);
         renderTasks();
+
+    function spendMoney() {
+      const amount = parseInt(document.getElementById("spendInput").value);
+      if (isNaN(amount) || amount <= 0) {
+        alert("有効な金額を入力してください。");
+        return;
+      }
+      if (amount > money) {
+        alert("マネーが足りません。");
+        return;
+      }
+      money -= amount;
+      document.getElementById("spendInput").value = "";
+      renderTasks();
+      saveData();
+    }
         saveData();
       }
     }
@@ -209,6 +262,22 @@
     }
 
     renderTasks();
+
+    function spendMoney() {
+      const amount = parseInt(document.getElementById("spendInput").value);
+      if (isNaN(amount) || amount <= 0) {
+        alert("有効な金額を入力してください。");
+        return;
+      }
+      if (amount > money) {
+        alert("マネーが足りません。");
+        return;
+      }
+      money -= amount;
+      document.getElementById("spendInput").value = "";
+      renderTasks();
+      saveData();
+    }
   </script>
 </body>
 </html>
